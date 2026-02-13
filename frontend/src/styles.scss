@@ -1,0 +1,33 @@
+// /* Global styles */
+// body {
+//   font-family: Arial, sans-serif;
+//   margin: 0;
+//   padding: 0;
+// }
+/* Angular Material Theme */
+/* Global styles */
+@import "~@angular/material/prebuilt-themes/indigo-pink.css";
+
+body {
+  margin: 0;
+  font-family: Roboto, Arial, sans-serif;
+  background: linear-gradient(135deg, #f0f8ff, #cce7ff);
+}
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 20px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.result-box {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 8px;
+}
