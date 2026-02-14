@@ -1,10 +1,13 @@
-from flask import Flask, request, jsonify
+# for render 
+
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from nltk.sentiment import SentimentIntensityAnalyzer
 from nltk.tokenize import word_tokenize
 import nltk
+import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static")  # Set static folder to where Angular build is
 CORS(app)
 
 # Auto-download required NLTK resources
@@ -48,18 +51,16 @@ def detect_tone(compound):
     else:
         return "Neutral"
 
-# --- Updated negation-aware word highlighting ---
+# Negation-aware word highlighting
 def get_word_sentiments(text):
     words = word_tokenize(text)
     positive_words = []
     negative_words = []
 
     for i, w in enumerate(words):
-        # Check the word along with its preceding word for negation
         phrase = " ".join(words[max(0, i-1):i+1])  # previous + current word
         score = sia.polarity_scores(phrase)['compound']
 
-        # Append to correct list only if it's in possible_sentiment_words
         if score > 0 and w.lower() in possible_sentiment_words:
             positive_words.append(w)
         elif score < 0 and w.lower() in possible_sentiment_words:
@@ -67,7 +68,7 @@ def get_word_sentiments(text):
 
     return list(set(positive_words)), list(set(negative_words))
 
-# Flask route to analyze sentiment
+# API route
 @app.route("/analyze", methods=["POST"])
 def analyze_sentiment():
     data = request.json
@@ -81,7 +82,6 @@ def analyze_sentiment():
 
     positive_words, negative_words = get_word_sentiments(text)
 
-    # Determine sentiment including Mixed
     if positive_words and negative_words:
         sentiment = "Mixed"
     elif compound >= 0.05:
@@ -105,12 +105,154 @@ def analyze_sentiment():
         "tone": tone
     })
 
-@app.route("/")
-def home():
-    return jsonify({"status": "Sentiment Analysis API running"}), 200
+# --- Serve Angular frontend ---
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve(path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, "index.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# from flask import Flask, request, jsonify
+# from flask_cors import CORS
+# from nltk.sentiment import SentimentIntensityAnalyzer
+# from nltk.tokenize import word_tokenize
+# import nltk
+
+# app = Flask(__name__)
+# CORS(app)
+
+# # Auto-download required NLTK resources
+# try:
+#     nltk.data.find("sentiment/vader_lexicon.zip")
+# except LookupError:
+#     nltk.download("vader_lexicon")
+
+# try:
+#     nltk.data.find("tokenizers/punkt")
+# except LookupError:
+#     nltk.download("punkt")
+
+# sia = SentimentIntensityAnalyzer()
+
+# # Emoji mapping
+# emoji_map = {
+#     "Positive": "😊",
+#     "Negative": "😞",
+#     "Neutral": "😐",
+#     "Mixed": "😶"
+# }
+
+# # Common sentiment words for highlighting
+# possible_sentiment_words = [
+#     "like", "love", "hate", "dislike", "happy", "sad", "angry", "amazing",
+#     "terrible", "good", "bad", "excellent", "poor", "awesome", "worst", "best",
+#     "expensive", "cheap", "joy", "disgust", "fun", "boring", "irritating"
+# ]
+
+# # Detect tone based on compound score
+# def detect_tone(compound):
+#     if compound >= 0.5:
+#         return "Joy"
+#     elif 0.05 <= compound < 0.5:
+#         return "Happy"
+#     elif -0.5 < compound < 0:
+#         return "Sad"
+#     elif compound <= -0.5:
+#         return "Anger"
+#     else:
+#         return "Neutral"
+
+# # --- Updated negation-aware word highlighting ---
+# def get_word_sentiments(text):
+#     words = word_tokenize(text)
+#     positive_words = []
+#     negative_words = []
+
+#     for i, w in enumerate(words):
+#         # Check the word along with its preceding word for negation
+#         phrase = " ".join(words[max(0, i-1):i+1])  # previous + current word
+#         score = sia.polarity_scores(phrase)['compound']
+
+#         # Append to correct list only if it's in possible_sentiment_words
+#         if score > 0 and w.lower() in possible_sentiment_words:
+#             positive_words.append(w)
+#         elif score < 0 and w.lower() in possible_sentiment_words:
+#             negative_words.append(w)
+
+#     return list(set(positive_words)), list(set(negative_words))
+
+# # Flask route to analyze sentiment
+# @app.route("/analyze", methods=["POST"])
+# def analyze_sentiment():
+#     data = request.json
+#     text = data.get("text", "").strip()
+
+#     if not text:
+#         return jsonify({"error": "Text is required"}), 400
+
+#     scores = sia.polarity_scores(text)
+#     compound = scores['compound']
+
+#     positive_words, negative_words = get_word_sentiments(text)
+
+#     # Determine sentiment including Mixed
+#     if positive_words and negative_words:
+#         sentiment = "Mixed"
+#     elif compound >= 0.05:
+#         sentiment = "Positive"
+#     elif compound <= -0.05:
+#         sentiment = "Negative"
+#     else:
+#         sentiment = "Neutral"
+
+#     confidence = round(abs(compound) * 100, 2)
+#     tone = detect_tone(compound)
+
+#     return jsonify({
+#         "text": text,
+#         "sentiment": sentiment,
+#         "polarity": round(compound, 3),
+#         "confidence": f"{confidence}%",
+#         "emoji": emoji_map[sentiment],
+#         "positive_words": positive_words,
+#         "negative_words": negative_words,
+#         "tone": tone
+#     })
+
+# @app.route("/")
+# def home():
+#     return jsonify({"status": "Sentiment Analysis API running"}), 200
+
+# if __name__ == "__main__":
+#     app.run(host="0.0.0.0", port=5000, debug=True)
 
 
 
