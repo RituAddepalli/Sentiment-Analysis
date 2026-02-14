@@ -1,111 +1,4 @@
 <!-- 
-
-<div class="container">
-  <h1>Sentiment Analysis App</h1>
-  <p class="subtitle">AI-powered text sentiment analyzer</p>
-
-  <textarea
-    [(ngModel)]="userText"
-    placeholder="Enter your text..."
-    rows="4"
-  ></textarea>
-
-  <button (click)="analyze()" [disabled]="loading">
-    {{ loading ? 'Analyzing...' : 'Analyze Sentiment' }}
-  </button>
-
-  <div *ngIf="loading" class="loader"></div>
-
-  <div
-    class="result-card"
-    *ngIf="result"
-    [ngStyle]="{ borderColor: getResultColor() }"
-  >
-    <h2>
-      Result {{ result.emoji }}
-    </h2>
-
-    <p><strong>Sentiment:</strong> {{ result.sentiment }}</p>
-    <p><strong>Polarity:</strong> {{ result.polarity }}</p>
-    <p><strong>Confidence:</strong> {{ result.confidence }}</p>
-    <p><strong>Tone:</strong> {{ result.tone }}</p>
-
-    <div class="progress">
-      <div
-        class="bar"
-        [style.width.%]="getPolarityPercent()"
-
-        [ngStyle]="{ background: getResultColor() }"
-      ></div>
-    </div>
-
-    <p *ngIf="result.positive_words?.length">
-      <strong>Positive Words:</strong>
-      <span class="pos" *ngFor="let w of result.positive_words"> {{ w }} </span>
-    </p>
-
-    <p *ngIf="result.negative_words?.length">
-      <strong>Negative Words:</strong>
-      <span class="neg" *ngFor="let w of result.negative_words"> {{ w }} </span>
-    </p>
-  </div>
-</div> -->
-
-
-
-
-
-
-
-<!-- 
-
-
-<div class="container">
-  <h1 class="title">Sentiment Analysis App</h1>
-
-  <mat-card class="card">
-    <textarea
-      matInput
-      [(ngModel)]="userText"
-      placeholder="Enter your text here..."
-      rows="4"
-      class="input-text"
-    ></textarea>
-
-    <button mat-raised-button color="primary" (click)="analyze()" [disabled]="loading">
-      {{ loading ? 'Analyzing...' : 'Analyze Sentiment' }}
-    </button>
-  </mat-card>
-
-  <mat-card *ngIf="result" class="result-card" [ngStyle]="{'background-color': getResultColor()}">
-    <h2 class="result-title">Result {{ result.emoji }}</h2>
-
-    <div class="progress-bar">
-      <div class="fill" [style.width.%]="getPolarityPercent()"></div>
-    </div>
-
-    <p><b>Sentiment:</b> {{ result.sentiment }}</p>
-    <p><b>Polarity:</b> {{ result.polarity }}</p>
-    <p><b>Confidence:</b> {{ result.confidence }}</p>
-    <p><b>Tone:</b> {{ result.tone }}</p>
-
-    <p><b>Positive Words:</b> {{ result.positive_words.join(', ') || 'None' }}</p>
-    <p><b>Negative Words:</b> {{ result.negative_words.join(', ') || 'None' }}</p>
-  </mat-card>
-
-  <mat-card *ngIf="result?.history?.length" class="history-card">
-    <h3>Last 10 Analyses</h3>
-    <ul>
-      <li *ngFor="let h of result.history">
-        "{{ h.text }}" → {{ h.sentiment }} ({{ h.polarity }})
-      </li>
-    </ul>
-  </mat-card>
-</div>
-
- -->
-
-
 <div class="container">
   <h2>Sentiment Analysis App</h2>
 
@@ -113,6 +6,47 @@
     [(ngModel)]="userText"
     rows="5"
     placeholder="Enter your text here..."
+  ></textarea>
+
+  <br /><br />
+  <button (click)="analyze()" [disabled]="loading">
+    {{ loading ? 'Analyzing...' : 'Analyze Sentiment' }}
+  </button>
+
+  <div *ngIf="result" class="result-card" [ngStyle]="{'background-color': getResultColor()}">
+    <h3>Result {{ result.emoji }}</h3>
+    <p><b>Sentiment:</b> {{ result.sentiment }}</p>
+    <p><b>Polarity:</b> {{ result.polarity }}</p>
+    <p><b>Confidence:</b> {{ result.confidence }}</p>
+    <p><b>Tone:</b> {{ result.tone }}</p>
+    <p><b>Positive Words:</b> {{ result.positive_words.join(', ') || 'None' }}</p>
+    <p><b>Negative Words:</b> {{ result.negative_words.join(', ') || 'None' }}</p>
+  </div>
+</div>
+
+ -->
+
+
+
+
+
+
+<div class="container">
+  <h2>Sentiment Analysis App</h2>
+
+  <!-- Example sentences -->
+  <div class="examples">
+    <p><b>Try these examples:</b></p>
+    <button (click)="setExample('I love this phone, the camera is amazing!')">😊 Positive</button>
+    <button (click)="setExample('This app is terrible and very slow.')">😞 Negative</button>
+    <button (click)="setExample('The phone Colour is black.')">😐 Neutral</button>
+    <button (click)="setExample('The design is good but the battery is bad.')">😶 Mixed</button>
+  </div>
+
+  <textarea
+    [(ngModel)]="userText"
+    rows="5"
+    placeholder="Try: 'I love this app', 'This is bad', or type your own sentence..."
   ></textarea>
 
   <br /><br />
@@ -140,125 +74,3 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-<!-- <mat-toolbar color="primary">
-  Sentiment Analysis App
-</mat-toolbar>
-
-<div class="container">
-  <mat-card>
-    <mat-card-title>Enter Your Text</mat-card-title>
-    <mat-card-content>
-      <mat-form-field appearance="outline" class="full-width">
-        <textarea
-          matInput
-          placeholder="Type something..."
-          [(ngModel)]="userText"
-          rows="5"
-        ></textarea>
-      </mat-form-field>
-
-      <button
-        mat-raised-button
-        color="primary"
-        (click)="analyze()"
-        [disabled]="loading"
-      >
-        {{ loading ? 'Analyzing...' : 'Analyze Sentiment' }}
-      </button>
-
-      <div
-        *ngIf="result"
-        class="result-box"
-        [ngStyle]="{'background-color': getResultColor()}"
-      >
-        <h3>Result:</h3>
-        <p><b>Sentiment:</b> {{ result.sentiment }}</p>
-        <p><b>Polarity:</b> {{ result.polarity }}</p>
-      </div>
-    </mat-card-content>
-  </mat-card>
-</div>
-
- -->
-
-
-
-
-<!-- <div
-  style="
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #f0f8ff, #cce7ff);
-    font-family: Arial, sans-serif;
-  "
->
-  <div
-    style="
-      background-color: #ffffff;
-      padding: 30px 40px;
-      border-radius: 12px;
-      box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
-      width: 400px;
-      text-align: center;
-    "
-  >
-    <h2 style="color: #007bff;">Sentiment Analysis App</h2>
-
-    <textarea
-      [(ngModel)]="userText"
-      rows="5"
-      placeholder="Enter your text here..."
-      style="
-        width: 100%;
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        resize: none;
-        font-size: 16px;
-      "
-    ></textarea>
-
-    <br /><br />
-    <button
-      (click)="analyze()"
-      style="
-        padding: 10px 20px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 16px;
-      "
-    >
-      Analyze Sentiment
-    </button>
-
-    <div
-      *ngIf="result"
-      [style.background-color]="getResultColor()"
-      style="
-        margin-top: 20px;
-        padding: 15px;
-        border-radius: 8px;
-      "
-    >
-      <h3 style="color: #0056b3;">Result:</h3>
-      <p><b>Sentiment:</b> {{ result.sentiment }}</p>
-      <p><b>Polarity:</b> {{ result.polarity }}</p>
-    </div>
-  </div>
-</div>
- -->
