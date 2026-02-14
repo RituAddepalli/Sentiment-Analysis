@@ -1,12 +1,14 @@
-# for render 
-# for render 
-
+# for Render deployment
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from nltk.sentiment import SentimentIntensityAnalyzer
 from nltk.tokenize import word_tokenize
 import nltk
 import os
+
+# Initialize Flask app
+app = Flask(__name__, static_folder="static")  # Angular build folder
+CORS(app)
 
 # Ensure necessary NLTK resources are available
 nltk_packages = {
@@ -18,26 +20,7 @@ for pkg, category in nltk_packages.items():
     try:
         nltk.data.find(f"{category}/{pkg}")
     except LookupError:
-        nltk.download(pkg)
-
-
-from nltk.tokenize import word_tokenize
-import nltk
-import os
-
-app = Flask(__name__, static_folder="static")  # Set static folder to where Angular build is
-CORS(app)
-
-# Auto-download required NLTK resources
-try:
-    nltk.data.find("sentiment/vader_lexicon.zip")
-except LookupError:
-    nltk.download("vader_lexicon")
-
-try:
-    nltk.data.find("tokenizers/punkt")
-except LookupError:
-    nltk.download("punkt")
+        nltk.download(pkg, quiet=True)
 
 sia = SentimentIntensityAnalyzer()
 
@@ -69,14 +52,17 @@ def detect_tone(compound):
     else:
         return "Neutral"
 
-# Negation-aware word highlighting
+# Negation-aware word highlighting with safe fallback
 def get_word_sentiments(text):
-    words = word_tokenize(text)
+    try:
+        words = word_tokenize(text)
+    except LookupError:
+        words = text.split()  # fallback if punkt fails
     positive_words = []
     negative_words = []
 
     for i, w in enumerate(words):
-        phrase = " ".join(words[max(0, i-1):i+1])  # previous + current word
+        phrase = " ".join(words[max(0, i-1):i+1])
         score = sia.polarity_scores(phrase)['compound']
 
         if score > 0 and w.lower() in possible_sentiment_words:
@@ -86,7 +72,7 @@ def get_word_sentiments(text):
 
     return list(set(positive_words)), list(set(negative_words))
 
-# API route
+# --- API route ---
 @app.route("/analyze", methods=["POST"])
 def analyze_sentiment():
     data = request.json
@@ -133,10 +119,7 @@ def serve(path):
         return send_from_directory(app.static_folder, "index.html")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
-
-
-
+    app.run(host="0.0.0.0", port=5000, debug=False)  # debug=False for production
 
 
 
