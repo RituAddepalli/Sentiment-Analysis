@@ -1,8 +1,26 @@
 # for render 
+# for render 
 
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from nltk.sentiment import SentimentIntensityAnalyzer
+from nltk.tokenize import word_tokenize
+import nltk
+import os
+
+# Ensure necessary NLTK resources are available
+nltk_packages = {
+    "vader_lexicon": "sentiment",
+    "punkt": "tokenizers"
+}
+
+for pkg, category in nltk_packages.items():
+    try:
+        nltk.data.find(f"{category}/{pkg}")
+    except LookupError:
+        nltk.download(pkg)
+
+
 from nltk.tokenize import word_tokenize
 import nltk
 import os
